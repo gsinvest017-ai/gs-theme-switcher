@@ -1,0 +1,22 @@
+{
+  "name": "gs-theme-switcher",
+  "version": "1.0.0",
+  "description": "Drop-in multi-theme switcher for vanilla HTML — Genesis Gold, VSCode Dark, GS Portal",
+  "main": "theme-switcher.js",
+  "style": "themes.css",
+  "files": [
+    "themes.css",
+    "theme-switcher.js",
+    "README.md"
+  ],
+  "keywords": ["theme", "dark-mode", "css-variables", "vanilla-js", "multi-theme"],
+  "author": "GS Invest <gsinvest017@gsinvest.com.tw>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gsinvest/gs-theme-switcher"
+  },
+  "scripts": {
+    "demo": "npx serve . -l 3456"
+  }
+}

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en" data-theme="genesis-gold">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>gs-theme-switcher demo</title>
+<link rel="stylesheet" href="themes.css" />
+<script src="theme-switcher.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; min-height: 100vh; }
+
+  header {
+    padding: 20px 32px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; color: var(--fg-0); }
+  header p  { margin: 0; font-size: 13px; color: var(--muted); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 24px 32px; }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+  }
+  .card h2 { margin: 0 0 10px; font-size: 15px; font-weight: 600; color: var(--fg-0); }
+  .card p  { margin: 0 0 10px; font-size: 13px; color: var(--fg-2); line-height: 1.6; }
+
+  .tag {
+    display: inline-block;
+    background: var(--border);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  .swatch-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .swatch {
+    width: 56px; text-align: center; font-size: 10px;
+    color: var(--muted);
+  }
+  .swatch-box {
+    width: 56px; height: 32px; border-radius: 4px;
+    border: 1px solid var(--line); margin-bottom: 3px;
+  }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  button {
+    padding: 6px 14px; border-radius: 4px; border: 1px solid var(--border);
+    background: var(--accent); color: var(--bg-0); font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  button.secondary {
+    background: transparent; color: var(--fg-2); border-color: var(--border);
+  }
+  button.secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  pre.code {
+    background: var(--bg-0); border: 1px solid var(--line); border-radius: 4px;
+    padding: 12px 14px; font-family: var(--font-mono); font-size: 12px;
+    color: var(--fg-1); overflow-x: auto; white-space: pre; margin: 0;
+  }
+
+  .palette-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px; margin-top: 10px;
+  }
+  .palette-item {
+    border-radius: 4px; padding: 8px 10px; font-size: 11px;
+    font-family: var(--font-mono);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>gs-theme-switcher <span class="tag">demo</span></h1>
+  <p>Three themes: Genesis Gold · VSCode Dark · GS Portal — switch above.</p>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>1. Install</h2>
+    <pre class="code">&lt;!-- In &lt;head&gt;, BEFORE any other CSS --&gt;
+&lt;link rel="stylesheet" href="themes.css"&gt;
+&lt;script src="theme-switcher.js"&gt;&lt;/script&gt;</pre>
+    <p style="margin-top:10px">The script applies the saved theme instantly (no flash) and appends the picker to <code style="font-family:var(--font-mono);">&lt;header&gt;</code> once the DOM is ready.</p>
+  </div>
+
+  <div class="card">
+    <h2>2. Configuration</h2>
+    <pre class="code">&lt;!-- Set BEFORE loading theme-switcher.js --&gt;
+&lt;script&gt;
+  window.GsThemeSwitcherConfig = {
+    lsKey:          'my-app-theme',   // localStorage key
+    defaultTheme:   'vscode-dark',    // fallback theme
+    headerSelector: '.site-header',  // where to inject picker
+  };
+&lt;/script&gt;
+&lt;script src="theme-switcher.js"&gt;&lt;/script&gt;</pre>
+  </div>
+
+  <div class="card">
+    <h2>3. Programmatic API</h2>
+    <pre class="code">// Apply a theme
+ThemeSwitcher.apply('gs-portal');
+
+// Get current theme
+console.log(ThemeSwitcher.current());  // 'genesis-gold'
+
+// Build picker and place it yourself
+const picker = ThemeSwitcher.buildPicker();
+document.querySelector('.my-nav').appendChild(picker);
+
+// Listen for changes
+ThemeSwitcher._onChange = (themeId) =&gt; console.log('switched to', themeId);</pre>
+    <div class="btn-row" style="margin-top:12px">
+      <button onclick="ThemeSwitcher.apply('genesis-gold')">✦ Genesis Gold</button>
+      <button onclick="ThemeSwitcher.apply('vscode-dark')" class="secondary">◈ VSCode Dark</button>
+      <button onclick="ThemeSwitcher.apply('gs-portal')" class="secondary">⬡ GS Portal</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4. CSS Variable Palette</h2>
+    <p>All three themes expose the same CSS custom properties so components are theme-agnostic.</p>
+    <div class="palette-grid" id="swatches"></div>
+  </div>
+
+  <div class="card">
+    <h2>5. Component Samples</h2>
+    <p>These elements use only <code style="font-family:var(--font-mono)">var(--…)</code> — they adapt automatically:</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <button>Primary action</button>
+      <button class="secondary">Secondary</button>
+      <span class="tag">tag chip</span>
+      <span style="font-size:12px;color:var(--muted)">muted text</span>
+    </div>
+    <pre class="code" style="margin-top:12px">background: var(--bg-card);
+border: 1px solid var(--line);
+color: var(--fg-0);
+accent: var(--accent);</pre>
+  </div>
+
+</main>
+
+<script>
+// Render a live palette swatch grid
+(function () {
+  var vars = [
+    '--bg-0','--bg-1','--bg-2','--bg-card',
+    '--fg-0','--fg-1','--fg-2','--muted',
+    '--accent','--ok','--warn','--err',
+    '--gold','--gold-light','--amber','--rose',
+  ];
+  var grid = document.getElementById('swatches');
+
+  function render() {
+    grid.innerHTML = '';
+    var style = getComputedStyle(document.documentElement);
+    vars.forEach(function (v) {
+      var val = style.getPropertyValue(v).trim();
+      var item = document.createElement('div');
+      item.className = 'palette-item';
+      item.style.cssText = 'background:' + val + ';color:' + (v.startsWith('--bg') || v === '--fg-dim' ? '#f0e8d6' : '#07060a');
+      item.textContent = v;
+      grid.appendChild(item);
+    });
+  }
+
+  render();
+  ThemeSwitcher._onChange = function () { setTimeout(render, 50); };
+})();
+</script>
+</body>
+</html>
