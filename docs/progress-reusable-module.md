@@ -13,7 +13,21 @@
 
 ## 進度日誌
 
-<!-- 每完成一個 milestone 追加段落 -->
+### M1 — dist/ 壓縮版 + build 腳本 (077e31b)
+- `scripts/build.js`：純 Node.js，零相依，CSS -42% / JS -50%
+- `dist/themes.min.css`、`dist/theme-switcher.min.js` 供 CDN 引用
+- `package.json` 新增 `build` / `prepublishOnly` 腳本，`files` 加入 dist/
+
+### M2 — CLI inject 工具 (8abe3ad)
+- `bin/inject.js`：`npx gs-theme-switcher inject <html-file>`
+- 自動插入兩行到 `</head>` 前，預設使用 jsDelivr CDN
+- 支援 `--base`、`--local`、`--dry-run`、`--revert`
+- `package.json` 加入 `bin` 欄位
+
+### M3 — README 框架整合範例 (02d2deb)
+- jsDelivr CDN 一行引入、minified URL、pinned commit 說明
+- 框架 snippet：Flask/Jinja2、Streamlit、Plotly Dash、React/Vite、Vue/Nuxt
+- CLI 用法章節
 
 ## Fallback 指引
 
