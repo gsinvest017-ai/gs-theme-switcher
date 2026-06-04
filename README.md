@@ -13,23 +13,204 @@ Two files, zero dependencies, no build step.
 
 ---
 
-## Quick start
+## Quick start — CDN (fastest, no install)
 
 ```html
 <head>
   <!-- Load BEFORE any other CSS that uses var(--…) -->
-  <link rel="stylesheet" href="themes.css">
-  <script src="theme-switcher.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/themes.css">
+  <script src="https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/theme-switcher.js"></script>
 </head>
 <body>
   <header>…</header>   <!-- picker is appended here automatically -->
 </body>
 ```
 
-The script:
-1. Reads the saved theme from `localStorage('gs-theme')` (or uses `genesis-gold`)
-2. Sets `<html data-theme="…">` **immediately** — no flash of wrong theme
-3. Appends a `.theme-picker` pill-button row to the first `<header>` once DOM is ready
+Pin to a specific commit for stability:
+```
+https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@<commit-sha>/themes.css
+```
+
+Minified versions (smaller payload):
+```
+https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/dist/themes.min.css
+https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/dist/theme-switcher.min.js
+```
+
+---
+
+## Quick start — local copy
+
+```bash
+# copy files into your project
+curl -O https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/themes.css
+curl -O https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/theme-switcher.js
+```
+
+```html
+<head>
+  <link rel="stylesheet" href="themes.css">
+  <script src="theme-switcher.js"></script>
+</head>
+```
+
+---
+
+## CLI inject (auto-insert into HTML)
+
+```bash
+# one-time inject — inserts two lines before </head>, uses CDN by default
+npx gs-theme-switcher inject index.html
+
+# use local copy instead of CDN
+npx gs-theme-switcher inject index.html --local
+
+# custom base path (e.g. served from /static/)
+npx gs-theme-switcher inject index.html --base /static/gs-theme
+
+# preview without writing
+npx gs-theme-switcher inject index.html --dry-run
+
+# undo
+npx gs-theme-switcher inject index.html --revert
+```
+
+---
+
+## Framework integrations
+
+### Flask / Jinja2
+
+In your base template (`templates/base.html`):
+
+```html
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='gs-theme/themes.css') }}">
+  <script src="{{ url_for('static', filename='gs-theme/theme-switcher.js') }}"></script>
+</head>
+```
+
+Or use CDN — no static files needed:
+
+```html
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/themes.css">
+  <script src="https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/theme-switcher.js"></script>
+</head>
+```
+
+Auto-inject into an existing template:
+
+```bash
+npx gs-theme-switcher inject templates/base.html
+```
+
+---
+
+### Streamlit
+
+Streamlit doesn't expose `<head>` directly, but `st.markdown` with `unsafe_allow_html=True` injects a `<style>` block:
+
+```python
+import streamlit as st
+
+CDN = "https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master"
+
+st.markdown(f"""
+<link rel="stylesheet" href="{CDN}/themes.css">
+<script src="{CDN}/theme-switcher.js"></script>
+""", unsafe_allow_html=True)
+```
+
+> Note: Streamlit's own theme overrides some global `body` styles.
+> Use `:root[data-theme="…"] .stApp` selectors to override Streamlit specifically.
+
+---
+
+### Plotly Dash
+
+```python
+import dash
+from dash import html
+
+CDN = "https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master"
+
+app = dash.Dash(
+    __name__,
+    external_stylesheets=[f"{CDN}/themes.css"],
+    external_scripts=[f"{CDN}/theme-switcher.js"],
+)
+
+app.layout = html.Div([
+    html.Header([html.H1("My Dashboard")]),
+    # … your layout
+])
+```
+
+---
+
+### React / Vite
+
+```bash
+# copy into your public folder (or use CDN in index.html)
+cp node_modules/gs-theme-switcher/themes.css       public/
+cp node_modules/gs-theme-switcher/theme-switcher.js public/
+```
+
+In `index.html`:
+```html
+<head>
+  <link rel="stylesheet" href="/themes.css">
+  <script src="/theme-switcher.js"></script>
+</head>
+```
+
+Or import from npm (after `npm install gs-theme-switcher`):
+
+```js
+// main.jsx / main.ts
+import 'gs-theme-switcher/themes.css';
+import ThemeSwitcher from 'gs-theme-switcher';
+
+ThemeSwitcher.apply(ThemeSwitcher.current());
+
+// Render picker into a React ref
+function ThemePicker() {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (ref.current && !ref.current.hasChildNodes()) {
+      ref.current.appendChild(ThemeSwitcher.buildPicker());
+    }
+  }, []);
+  return <div ref={ref} />;
+}
+```
+
+---
+
+### Vue / Nuxt
+
+In `nuxt.config.ts`:
+```ts
+export default defineNuxtConfig({
+  app: {
+    head: {
+      link:   [{ rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/themes.css' }],
+      script: [{ src: 'https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/theme-switcher.js' }],
+    },
+  },
+});
+```
+
+In a Vue SFC:
+```vue
+<script setup>
+onMounted(() => {
+  // ThemeSwitcher is available as window.ThemeSwitcher after the script loads
+  window.ThemeSwitcher?._autoInit();
+});
+</script>
+```
 
 ---
 
@@ -98,19 +279,13 @@ All themes expose the same properties — components only need `var(--…)`:
 
 ---
 
-## Integration with existing projects
+## npm install
 
-Add to any page that already has a `<header>`:
-
-```html
-<!-- Add these two lines; the rest of your CSS continues to work via var(--…) -->
-<link rel="stylesheet" href="path/to/themes.css">
-<script src="path/to/theme-switcher.js"></script>
+```bash
+npm install gs-theme-switcher
 ```
 
-If your existing CSS uses hardcoded hex colors instead of `var(--…)`, add
-`[data-theme="…"]` overrides in `themes.css` to override them
-(see the `gs-portal` section in `themes.css` for examples).
+After install, files are in `node_modules/gs-theme-switcher/` — copy or reference via your bundler.
 
 ---
 
@@ -127,9 +302,13 @@ npm run demo   # serves on http://localhost:3456
 ## File overview
 
 ```
-themes.css           CSS variables for all three themes + .theme-picker component
-theme-switcher.js    IIFE / CJS / AMD — apply(), buildPicker(), injectPicker()
-demo.html            Self-contained live demo
+themes.css              CSS variables for all three themes + .theme-picker component
+theme-switcher.js       IIFE / CJS / AMD — apply(), buildPicker(), injectPicker()
+dist/themes.min.css     minified (≈-42%)
+dist/theme-switcher.min.js  minified (≈-50%)
+bin/inject.js           CLI — npx gs-theme-switcher inject <html-file>
+scripts/build.js        build → dist/  (zero npm deps)
+demo.html               Self-contained live demo
 ```
 
 ---
