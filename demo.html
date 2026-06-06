@@ -289,6 +289,78 @@ accent: var(--accent);</pre>
 &lt;/body&gt;</pre>
   </div>
 
+
+  <!-- ── Section 9: Repo Theme Adoption Dashboard ─────────────────── -->
+  <div class="card" id="adoption-card">
+    <h2>9. Repo Theme Adoption <span class="tag">audit server</span></h2>
+    <p>Scan your GitHub repos to find dashboards that haven't adopted gs-theme-switcher yet, then apply in one click.</p>
+
+    <!-- Offline state: audit server not running -->
+    <div id="audit-offline">
+      <p style="color:var(--warn);margin:10px 0 6px;font-size:13px">
+        ⚠ Audit server not running. Start it:
+      </p>
+      <pre class="code">npm run audit</pre>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px">
+        Then open <code style="font-family:var(--font-mono)">http://localhost:3457</code>
+      </p>
+    </div>
+
+    <!-- Online state: audit server available -->
+    <div id="audit-online" style="display:none">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <button class="gs-btn" id="scan-btn" onclick="auditDash.scan()">
+          <i data-lucide="scan-search" class="icon"></i> Scan My Repos
+        </button>
+        <span id="scan-status" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+
+      <!-- Progress bar -->
+      <div id="scan-progress" style="display:none;margin-bottom:12px">
+        <div style="height:3px;background:var(--line);border-radius:2px;overflow:hidden">
+          <div id="scan-bar" style="height:100%;background:var(--accent);width:0%;transition:width 0.4s ease"></div>
+        </div>
+      </div>
+
+      <!-- Results table -->
+      <div id="scan-results" style="display:none">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="border-bottom:1px solid var(--line)">
+                <th style="padding:5px 6px;text-align:center;color:var(--muted);font-weight:500;width:28px">
+                  <input type="checkbox" id="select-all-cb" title="Select all unadopted"
+                    onchange="auditDash.toggleAll(this.checked)">
+                </th>
+                <th style="padding:5px 8px;text-align:left;color:var(--muted);font-weight:500">Repo</th>
+                <th style="padding:5px 8px;text-align:left;color:var(--muted);font-weight:500">HTML Files</th>
+                <th style="padding:5px 8px;text-align:left;color:var(--muted);font-weight:500">Status</th>
+              </tr>
+            </thead>
+            <tbody id="repo-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Action bar -->
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="gs-btn" id="apply-btn" onclick="auditDash.apply()" disabled>
+            <i data-lucide="zap" class="icon"></i>
+            Apply to Selected (<span id="selected-count">0</span>)
+          </button>
+          <span style="font-size:11px;color:var(--muted)">
+            Creates <code style="font-family:var(--font-mono)">feat/gs-theme-switcher</code> branch + commit — no push
+          </span>
+        </div>
+
+        <!-- Apply log -->
+        <div id="apply-log" style="display:none;margin-top:12px">
+          <pre class="code" id="apply-log-content"
+            style="white-space:pre-wrap;max-height:220px;overflow-y:auto;font-size:11px"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <script>
@@ -325,6 +397,231 @@ accent: var(--accent);</pre>
 
 // Render all Lucide icons after DOM is ready
 if (typeof lucide !== 'undefined') lucide.createIcons();
+</script>
+
+<!-- ── Repo Adoption Dashboard logic ─────────────────────────────── -->
+<script>
+var auditDash = (function () {
+  var repos    = [];
+  var selected = {};   // nameWithOwner → true
+
+  /* ── helpers ── */
+
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function $id(id) { return document.getElementById(id); }
+
+  function updateApplyBtn() {
+    var n = Object.keys(selected).length;
+    $id('selected-count').textContent = n;
+    $id('apply-btn').disabled = n === 0;
+  }
+
+  /* ── init: check if audit server is reachable ── */
+
+  function init() {
+    fetch('/api/health')
+      .then(function (r) { return r.ok; })
+      .then(function (ok) { setOnline(ok); })
+      .catch(function () { setOnline(false); });
+  }
+
+  function setOnline(ok) {
+    $id('audit-offline').style.display = ok ? 'none'  : 'block';
+    $id('audit-online').style.display  = ok ? 'block' : 'none';
+    if (ok && typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── scan: SSE stream ── */
+
+  function scan() {
+    repos = {};
+    selected = {};
+    $id('scan-btn').disabled = true;
+    $id('scan-status').textContent = 'Connecting…';
+    $id('scan-progress').style.display = 'block';
+    $id('scan-bar').style.width = '0%';
+    $id('scan-results').style.display = 'none';
+    $id('apply-log').style.display = 'none';
+    $id('repo-tbody').innerHTML = '';
+    updateApplyBtn();
+
+    var total = 0, done = 0;
+
+    var es = new EventSource('/api/scan');
+
+    es.onmessage = function (e) {
+      var msg;
+      try { msg = JSON.parse(e.data); } catch (_) { return; }
+
+      if (msg.type === 'error') {
+        $id('scan-status').textContent = 'Error: ' + msg.message;
+        $id('scan-btn').disabled = false;
+        es.close(); return;
+      }
+
+      if (msg.type === 'count') {
+        total = msg.total;
+        $id('scan-status').textContent = '0 / ' + total;
+        return;
+      }
+
+      if (msg.type === 'repo') {
+        var r = msg.repo;
+        repos[r.nameWithOwner] = r;
+        done++;
+        var pct = total ? Math.round(done / total * 100) : 100;
+        $id('scan-bar').style.width = pct + '%';
+        $id('scan-status').textContent = done + (total ? ' / ' + total : '') + ' repos scanned';
+        appendRow(r);
+        $id('scan-results').style.display = 'block';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      if (msg.type === 'done') {
+        $id('scan-btn').disabled = false;
+        $id('scan-status').textContent = '✓ ' + done + ' repos scanned';
+        es.close(); return;
+      }
+    };
+
+    es.onerror = function () {
+      $id('scan-btn').disabled = false;
+      $id('scan-status').textContent = 'Connection lost';
+      es.close();
+    };
+  }
+
+  /* ── render one table row ── */
+
+  function appendRow(r) {
+    var tbody = $id('repo-tbody');
+    var unadoptedFiles = (r.htmlFiles || []).filter(function (f) { return !f.adopted; });
+    var canSelect = !r.adopted && unadoptedFiles.length > 0;
+
+    var statusHtml;
+    if (r.adopted) {
+      statusHtml = '<span class="gs-badge ok"><span class="gs-badge-dot"></span>adopted</span>';
+    } else if (r.htmlFiles && r.htmlFiles.length > 0) {
+      statusHtml = '<span class="gs-badge err"><span class="gs-badge-dot"></span>not applied</span>';
+    } else {
+      statusHtml = '<span class="gs-badge warn"><span class="gs-badge-dot"></span>' + esc(r.reason || 'no HTML') + '</span>';
+    }
+
+    var filesHtml;
+    if (r.htmlFiles && r.htmlFiles.length > 0) {
+      filesHtml = r.htmlFiles.map(function (f) {
+        var adopted = f.adopted
+          ? ' style="color:var(--ok)"'
+          : ' style="color:var(--fg-2)"';
+        return '<span' + adopted + ' title="' + (f.adopted ? 'adopted' : 'not applied') + '">' + esc(f.path) + '</span>';
+      }).join(' &middot; ');
+    } else {
+      filesHtml = '<span style="color:var(--line)">—</span>';
+    }
+
+    var cbHtml = canSelect
+      ? '<input type="checkbox" data-repo="' + esc(r.nameWithOwner) + '" onchange="auditDash.onCheck(this)">'
+      : '<span style="color:var(--line)">—</span>';
+
+    var tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--line)';
+    tr.innerHTML = [
+      '<td style="padding:5px 6px;text-align:center">', cbHtml, '</td>',
+      '<td style="padding:5px 8px">',
+        '<a href="', esc(r.url || '#'), '" target="_blank"',
+           ' style="color:var(--accent);text-decoration:none;font-family:var(--font-mono);font-size:12px">',
+           esc(r.nameWithOwner), '</a>',
+        r.isPrivate ? ' <span style="font-size:10px;color:var(--muted)">[private]</span>' : '',
+        r.isFork    ? ' <span style="font-size:10px;color:var(--muted)">[fork]</span>'    : '',
+      '</td>',
+      '<td style="padding:5px 8px;font-size:11px;max-width:320px;word-break:break-all">', filesHtml, '</td>',
+      '<td style="padding:5px 8px;white-space:nowrap">', statusHtml, '</td>',
+    ].join('');
+    tbody.appendChild(tr);
+  }
+
+  /* ── checkbox handlers ── */
+
+  function onCheck(cb) {
+    if (cb.checked) selected[cb.dataset.repo] = true;
+    else            delete selected[cb.dataset.repo];
+    updateApplyBtn();
+  }
+
+  function toggleAll(checked) {
+    document.querySelectorAll('#repo-tbody input[type=checkbox]').forEach(function (cb) {
+      cb.checked = checked;
+      if (checked) selected[cb.dataset.repo] = true;
+      else         delete selected[cb.dataset.repo];
+    });
+    updateApplyBtn();
+  }
+
+  /* ── apply ── */
+
+  function apply() {
+    var names = Object.keys(selected);
+    if (names.length === 0) return;
+
+    $id('apply-btn').disabled = true;
+    $id('scan-btn').disabled  = true;
+
+    var targets = names.map(function (nwo) {
+      var r = repos[nwo];
+      var htmlPaths = r
+        ? (r.htmlFiles || []).filter(function (f) { return !f.adopted; }).map(function (f) { return f.path; })
+        : [];
+      return { nameWithOwner: nwo, htmlPaths: htmlPaths };
+    });
+
+    var logEl = $id('apply-log');
+    var logContent = $id('apply-log-content');
+    logEl.style.display = 'block';
+    logContent.textContent = 'Applying to ' + targets.length + ' repo(s)…\n';
+
+    fetch('/api/apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targets: targets }),
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (results) {
+      var lines = ['Results:', ''];
+      results.forEach(function (r) {
+        if (r.ok) {
+          lines.push('✓  ' + r.repo);
+          lines.push('   injected:  ' + r.injected.join(', '));
+          lines.push('   tmp dir:   ' + r.tmpDir);
+          lines.push('   to push:   ' + r.pushCmd);
+          lines.push('   open PR:   ' + r.prCmd);
+        } else {
+          lines.push('✗  ' + r.repo + ' — ' + r.reason);
+          if (r.tmpDir) lines.push('   tmp dir:   ' + r.tmpDir);
+        }
+        lines.push('');
+      });
+      logContent.textContent = lines.join('\n');
+      $id('apply-btn').disabled = false;
+      $id('scan-btn').disabled  = false;
+    })
+    .catch(function (e) {
+      logContent.textContent += '\nError: ' + e.message;
+      $id('apply-btn').disabled = false;
+      $id('scan-btn').disabled  = false;
+    });
+  }
+
+  /* ── auto-init ── */
+  document.addEventListener('DOMContentLoaded', init);
+
+  return { init: init, scan: scan, onCheck: onCheck, toggleAll: toggleAll, apply: apply };
+})();
 </script>
 </body>
 </html>

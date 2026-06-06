@@ -18,6 +18,11 @@
 - 新增 `scripts/repo-audit.js`：`listRepos(limit)` / `scanRepo(repo)` / `applyToRepo(nameWithOwner, htmlPaths)`
 - 採用判定邏輯：`themes.css` + `theme-switcher.js` 同時出現 OR 有 `<!-- gs-theme-switcher:css -->` marker
 
+### M3 — demo.html Section 9 + package.json ✓
+- demo.html 新增「9. Repo Theme Adoption」卡片（離線提示 / 線上掃描 UI 雙態）
+- auditDash JS object：init / scan (SSE) / onCheck / toggleAll / apply
+- package.json 新增 `"audit": "node scripts/audit-server.js"`
+
 ### M2 — audit-server.js
 - 新增 `scripts/audit-server.js`
 - `GET /api/health` → `{ok:true}`

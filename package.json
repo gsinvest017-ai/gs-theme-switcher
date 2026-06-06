@@ -29,6 +29,7 @@
   "scripts": {
     "build":          "node scripts/build.js",
     "prepublishOnly": "node scripts/build.js",
-    "demo":           "npx serve . -l 3456"
+    "demo":           "npx serve . -l 3456",
+    "audit":          "node scripts/audit-server.js"
   }
 }
