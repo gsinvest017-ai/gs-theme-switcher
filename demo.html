@@ -78,6 +78,32 @@
     border-radius: 4px; padding: 8px 10px; font-size: 11px;
     font-family: var(--font-mono);
   }
+
+  /* ── compacted by /ui-compact 2026-06-06  (strategies: A B C) ── */
+  header { padding: 10px 24px 8px; }
+  header h1 { font-size: 19px; }
+
+  main {
+    max-width: 1440px;
+    padding: 10px 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    align-items: start;
+  }
+
+  .card { padding: 12px 15px; margin-bottom: 0; }
+  .card h2 { margin: 0 0 7px; font-size: 14px; }
+  .card p  { line-height: 1.45; margin-bottom: 7px; }
+
+  pre.code { padding: 8px 11px; }
+
+  .palette-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; }
+  .palette-item { padding: 5px 7px; }
+
+  /* Cards 8 + 9 span full width — too wide for half-column */
+  #ide-chrome-card,
+  #adoption-card { grid-column: 1 / -1; }
 </style>
 </head>
 <body>
@@ -212,7 +238,7 @@ accent: var(--accent);</pre>
   </div>
 
   <!-- ── NEW: IDE Chrome ───────────────────────────────────────── -->
-  <div class="card">
+  <div class="card" id="ide-chrome-card">
     <h2>8. IDE Chrome <span class="tag">components/ide-chrome.css</span></h2>
     <p>VS Code-like shell: titlebar · tabbar · editor · statusbar. Use <code style="font-family:var(--font-mono)">body.ide-shell</code> for full-viewport layout, or embed the sub-components inline.</p>
 
