@@ -27,7 +27,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ── Full-viewport shell ──────────────────────────────────────── */
-html, body.ide-shell {
+/* Only lock overflow when .ide-shell is actually in use.          */
+/* The bare `html` selector would block scrolling on normal pages. */
+html:has(body.ide-shell), body.ide-shell {
   width: 100vw; height: 100vh;
   overflow: hidden;
   font-family: var(--font-sans, -apple-system, "Segoe UI", sans-serif);
