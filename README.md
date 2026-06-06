@@ -279,6 +279,167 @@ All themes expose the same properties — components only need `var(--…)`:
 
 ---
 
+## Components
+
+Optional add-ons in `components/` — load after `themes.css`.  
+Each file is self-contained and uses only `var(--…)` from `themes.css`.
+
+### IDE Chrome — `components/ide-chrome.css`
+
+VS Code-like app shell extracted from [autogo](https://github.com/gsinvest/autogo).  
+Includes: titlebar · tabbar (with drag-to-reorder) · tab icons · statusbar · all three theme overrides.
+
+```html
+<head>
+  <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="components/ide-chrome.css">
+  <!-- Lucide icons (see below) -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="theme-switcher.js"></script>
+</head>
+<body class="ide-shell">
+  <div class="ide-titlebar">
+    <div class="ide-logo">
+      <span class="ide-logo-name">my-app</span>
+      <span class="ide-logo-tag">IDE</span>
+    </div>
+    <div class="ide-titlebar-right">
+      <span class="ide-theme-label">Theme</span>
+      <button class="ide-theme-btn active">✦</button>
+      <button class="ide-theme-btn">◈</button>
+    </div>
+  </div>
+
+  <div class="ide-tabbar">
+    <div class="ide-tab active" draggable="true">
+      <i data-lucide="layout-dashboard" class="ide-tab-icon"></i>
+      <span class="ide-tab-label">dashboard</span>
+    </div>
+    <div class="ide-tab" draggable="true">
+      <i data-lucide="file-text" class="ide-tab-icon"></i>
+      <span class="ide-tab-label">docs</span>
+    </div>
+  </div>
+
+  <div class="ide-editor">
+    <iframe src="/dashboard"></iframe>
+  </div>
+
+  <div class="ide-statusbar">
+    <span class="sb-left"><span class="sb-item">◈ my-app</span></span>
+    <span class="sb-right"><span class="sb-item">ready</span></span>
+  </div>
+</body>
+```
+
+CDN (minified):
+```
+https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/dist/ide-chrome.min.css
+```
+
+After inserting tab elements, call `lucide.createIcons()` to render the SVGs.
+
+Tab classes:
+| Class | Description |
+|-------|-------------|
+| `.ide-tab.active` | Active tab — accent top border, brighter text |
+| `.ide-tab.dragging` | Being dragged (opacity 0.35) |
+| `.ide-tab.drag-target` | Drop target — accent left border |
+
+Status bar states:
+| Class | Description |
+|-------|-------------|
+| `.ide-statusbar` | Normal — accent background |
+| `.ide-statusbar.connecting` | Muted — waiting for server |
+| `.ide-statusbar.err` | Error state — red/rose background |
+
+---
+
+### Lucide Icons — `components/lucide.css`
+
+Utility classes for [Lucide](https://lucide.dev) SVG icons.
+
+```html
+<head>
+  <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="components/lucide.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+```
+
+After inserting `<i data-lucide="…">` elements, call:
+```js
+lucide.createIcons();
+```
+
+**Inline icon (14 px)** — use in buttons, nav items, table cells:
+```html
+<button>
+  <i data-lucide="plus" class="icon"></i>
+  Add item
+</button>
+```
+
+**Empty-state placeholder (56 px)** — use in empty panels:
+```html
+<div class="display-placeholder">
+  <i data-lucide="monitor" class="ph-icon"></i>
+  <p class="ph-title">No window selected</p>
+  <p class="ph-hint">Pick a window from the list to begin.</p>
+</div>
+```
+
+Classes:
+| Class | Size | Use |
+|-------|------|-----|
+| `svg.icon` | 14 px | inline, `vertical-align: -0.175em` |
+| `svg.ph-icon` | 56 px | empty-state, `opacity: 0.55` |
+| `.display-placeholder` / `.frame-placeholder` | — | flex container, centred |
+| `.ph-title` | 15 px | placeholder heading |
+| `.ph-hint` | 12 px | placeholder sub-text |
+
+CDN (minified):
+```
+https://cdn.jsdelivr.net/gh/gsinvest/gs-theme-switcher@master/dist/lucide.min.css
+```
+
+---
+
+### Utility Classes — `themes.css` (built-in, no extra import)
+
+Available after loading `themes.css`:
+
+| Class | Description |
+|-------|-------------|
+| `.gs-card` | Card surface — `bg-card`, `1px line` border, `border-radius: 6px` |
+| `.gs-card:hover` | Slightly lighter background |
+| `.gs-toolbar` | Flex strip — gradient bg, `1px` bottom border |
+| `.gs-header` | Backdrop-blur page header |
+| `.gs-tag` | Inline chip — `border` background, `accent` text |
+| `.gs-badge` | Status pill — add `.ok` / `.warn` / `.err` |
+| `.gs-badge-dot` | Coloured dot inside `.gs-badge` |
+| `.gs-btn` | Primary button — accent border + soft fill |
+| `.gs-btn--secondary` | Ghost button — no fill, muted colour |
+
+```html
+<button class="gs-btn">
+  <i data-lucide="plus" class="icon"></i>
+  Primary
+</button>
+<button class="gs-btn gs-btn--secondary">Secondary</button>
+
+<span class="gs-badge ok">
+  <span class="gs-badge-dot"></span> online
+</span>
+
+<div class="gs-card">
+  <div class="gs-toolbar">…</div>
+  Content
+</div>
+```
+
+---
+
 ## npm install
 
 ```bash
@@ -302,13 +463,19 @@ npm run demo   # serves on http://localhost:3456
 ## File overview
 
 ```
-themes.css              CSS variables for all three themes + .theme-picker component
-theme-switcher.js       IIFE / CJS / AMD — apply(), buildPicker(), injectPicker()
-dist/themes.min.css     minified (≈-42%)
-dist/theme-switcher.min.js  minified (≈-50%)
-bin/inject.js           CLI — npx gs-theme-switcher inject <html-file>
-scripts/build.js        build → dist/  (zero npm deps)
-demo.html               Self-contained live demo
+themes.css                  CSS variables for all three themes + .theme-picker + utility classes
+theme-switcher.js           IIFE / CJS / AMD — apply(), buildPicker(), injectPicker()
+components/
+  ide-chrome.css            VS Code-like IDE chrome (titlebar / tabbar / statusbar)
+  lucide.css                Lucide icon utilities (inline + placeholder patterns)
+dist/
+  themes.min.css            minified (≈-41%)
+  theme-switcher.min.js     minified (≈-50%)
+  ide-chrome.min.css        minified (≈-38%)
+  lucide.min.css            minified (≈-80%)
+bin/inject.js               CLI — npx gs-theme-switcher inject <html-file>
+scripts/build.js            build → dist/  (zero npm deps)
+demo.html                   Self-contained live demo
 ```
 
 ---
