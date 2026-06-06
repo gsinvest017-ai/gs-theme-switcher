@@ -243,3 +243,115 @@ body {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* ================================================================
+ * Utility classes — gs-theme-switcher
+ * Extracted from autogo web/static/gs-theme.css (2026-06-06).
+ *
+ * Components: .gs-card, .gs-toolbar, .gs-header, .gs-tag,
+ *             .gs-badge, .gs-btn, .gs-btn--secondary
+ *
+ * All use only CSS variables defined above — theme-agnostic.
+ * ================================================================ */
+
+/* ── Card / panel surface ─────────────────────────────────────── */
+.gs-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.85);
+}
+.gs-card:hover {
+  background: var(--bg-card-hover);
+}
+
+/* ── Toolbar strip ────────────────────────────────────────────── */
+.gs-toolbar {
+  display: flex;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--bg-1), var(--bg-0));
+}
+
+/* ── Page header with blur ────────────────────────────────────── */
+.gs-header {
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gold-soft);
+}
+
+/* ── Inline tag / chip ────────────────────────────────────────── */
+.gs-tag {
+  display: inline-block;
+  background: var(--border, #2b2218);
+  color: var(--accent, #d4af37);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+/* ── Status badge (pill) ──────────────────────────────────────── */
+.gs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border, #283041);
+  background: var(--bg-card, #161210);
+  color: var(--fg-2, #8a7a5a);
+}
+.gs-badge .gs-badge-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--muted, #8b95a7);
+  flex-shrink: 0;
+}
+.gs-badge.ok    { color: var(--ok,   #e6c97a); }
+.gs-badge.ok    .gs-badge-dot { background: var(--ok,   #e6c97a); }
+.gs-badge.warn  { color: var(--warn, #f5a524); }
+.gs-badge.warn  .gs-badge-dot { background: var(--warn, #f5a524); }
+.gs-badge.err   { color: var(--err,  #e0a458); }
+.gs-badge.err   .gs-badge-dot { background: var(--err,  #e0a458); }
+
+/* ── Button — primary ─────────────────────────────────────────── */
+.gs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--accent, #d4af37);
+  background: var(--gold-soft, rgba(212,175,55,.1));
+  color: var(--accent, #d4af37);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.gs-btn:not(:disabled):hover {
+  background: var(--accent, #d4af37);
+  color: var(--bg-0, #07060a);
+}
+.gs-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+/* ── Button — secondary / ghost ──────────────────────────────── */
+.gs-btn--secondary {
+  background: transparent;
+  border-color: var(--border, #283041);
+  color: var(--fg-2, #8a7a5a);
+}
+.gs-btn--secondary:not(:disabled):hover {
+  background: var(--gold-soft, rgba(212,175,55,.08));
+  border-color: var(--accent, #d4af37);
+  color: var(--fg-1, #c9b88a);
+}

@@ -1,0 +1,130 @@
+/* ================================================================
+ * components/lucide.css — gs-theme-switcher
+ *
+ * Utility classes for Lucide SVG icons.
+ * Extracted from autogo web/static/style.css + dashboard.css (2026-06-06).
+ *
+ * Depends on:  themes.css  (CSS variables)
+ * Lucide CDN (add to <head>):
+ *   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+ * After inserting icon elements into the DOM, call:
+ *   lucide.createIcons()
+ *
+ * ── Inline icon (14 px) ──────────────────────────────────────────
+ * Use inside buttons, table cells, nav items:
+ *
+ *   <button>
+ *     <i data-lucide="plus" class="icon"></i>
+ *     Add item
+ *   </button>
+ *
+ * ── Large placeholder icon (56 px) ──────────────────────────────
+ * Use inside empty-state containers:
+ *
+ *   <div class="display-placeholder">
+ *     <i data-lucide="monitor" class="ph-icon"></i>
+ *     <p class="ph-title">No window selected</p>
+ *     <p class="ph-hint">Pick a window from the list to begin.</p>
+ *   </div>
+ *
+ * ── Tab icon (14 px, inherits parent opacity) ────────────────────
+ * Used inside .ide-tab (pairs with components/ide-chrome.css):
+ *
+ *   <div class="ide-tab active">
+ *     <i data-lucide="layout-dashboard" class="ide-tab-icon"></i>
+ *     <span class="ide-tab-label">dashboard</span>
+ *   </div>
+ * ================================================================ */
+
+/* ── Inline icon — 14 px ─────────────────────────────────────── */
+/* Lucide replaces <i data-lucide="…" class="icon"> with <svg class="lucide icon"> */
+svg.icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: -0.175em;   /* baseline-align with surrounding text */
+  flex-shrink: 0;
+  pointer-events: none;
+  stroke-width: 1.75;
+}
+
+/* ── Empty-state placeholder container ──────────────────────────
+ * Centre children vertically and horizontally.
+ * Add pointer-events: none so the placeholder doesn't block clicks. */
+.display-placeholder,
+.frame-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 32px;
+  text-align: center;
+  user-select: none;
+  pointer-events: none;
+  color: var(--border, #2b2218);
+}
+
+/* ── Large placeholder icon — 56 px ─────────────────────────────
+ * Lucide replaces <i data-lucide="…" class="ph-icon"> with <svg class="lucide … ph-icon"> */
+svg.ph-icon {
+  width: 56px !important;
+  height: 56px !important;
+  stroke-width: 1.2 !important;
+  opacity: 0.55;
+  color: var(--line-hi, #3d2f1f);
+  flex-shrink: 0;
+}
+
+/* ── Placeholder text helpers ────────────────────────────────── */
+.ph-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg-2, #8a7a5a);
+  margin: 4px 0 0;
+  letter-spacing: .01em;
+}
+
+.ph-hint {
+  font-size: 12px;
+  color: var(--fg-dim, #4f4530);
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+/* ── Tab icon — used inside .ide-tab (see ide-chrome.css) ────── */
+/* Declared here as well so lucide.css is self-contained for tab usage */
+.ide-tab-icon {
+  width: 14px; height: 14px;
+  flex-shrink: 0;
+  opacity: 0.65;
+  display: flex;
+  align-items: center;
+}
+.ide-tab-icon svg { width: 14px; height: 14px; stroke-width: 1.75; }
+
+/* ── Theme-aware placeholder icon colors ────────────────────────
+ * VSCode Dark and GS Portal use their own line-hi equivalent.
+ * The variable --line-hi already adapts through themes.css, so
+ * no explicit override is needed — kept here for documentation. */
+
+/* :root[data-theme="vscode-dark"] svg.ph-icon { color: var(--line-hi); } */
+/* :root[data-theme="gs-portal"]   svg.ph-icon { color: var(--line-hi); } */
+
+/* ── Recommended Lucide icon names for common autogo/GS contexts ─
+ *
+ * dashboard       layout-dashboard
+ * inspector       scan-search
+ * plans / tasks   clipboard-list
+ * replays / film  film
+ * testbench       flask-conical
+ * perf / chart    bar-chart-2
+ * sandbox / cli   terminal-square
+ * docs            file-text
+ * demo video      video
+ * no-selection    monitor-x  |  monitor  |  layout-grid
+ * loading         loader-circle  (animate with CSS spin)
+ * error           circle-x
+ * warning         triangle-alert
+ * info            info
+ * ================================================================ */
