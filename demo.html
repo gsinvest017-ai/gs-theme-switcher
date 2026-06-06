@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>gs-theme-switcher demo</title>
 <link rel="stylesheet" href="themes.css" />
+<link rel="stylesheet" href="components/ide-chrome.css" />
+<link rel="stylesheet" href="components/lucide.css" />
 <script src="theme-switcher.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; padding: 0; min-height: 100vh; }
@@ -149,6 +152,143 @@ color: var(--fg-0);
 accent: var(--accent);</pre>
   </div>
 
+  <!-- ── NEW: Utility classes ──────────────────────────────────── -->
+  <div class="card">
+    <h2>6. Utility Classes <span class="tag">components/themes.css</span></h2>
+    <p>Drop-in classes from <code style="font-family:var(--font-mono)">themes.css</code> — no extra import needed.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0">
+      <button class="gs-btn">
+        <i data-lucide="plus" class="icon"></i>
+        gs-btn
+      </button>
+      <button class="gs-btn gs-btn--secondary">
+        <i data-lucide="settings" class="icon"></i>
+        gs-btn--secondary
+      </button>
+      <span class="gs-tag">gs-tag</span>
+      <span class="gs-badge ok"><span class="gs-badge-dot"></span>ok</span>
+      <span class="gs-badge warn"><span class="gs-badge-dot"></span>warn</span>
+      <span class="gs-badge err"><span class="gs-badge-dot"></span>err</span>
+    </div>
+    <div class="gs-card" style="padding:14px;margin-top:8px">
+      <div class="gs-toolbar">
+        <button class="gs-btn" style="padding:3px 10px;font-size:12px">
+          <i data-lucide="refresh-cw" class="icon"></i> Refresh
+        </button>
+        <span style="font-size:12px;color:var(--muted)">gs-card + gs-toolbar</span>
+      </div>
+      <div style="padding:10px 0 2px;font-size:13px;color:var(--fg-1)">Card content area using <code style="font-family:var(--font-mono)">.gs-card</code> + <code style="font-family:var(--font-mono)">.gs-toolbar</code>.</div>
+    </div>
+  </div>
+
+  <!-- ── NEW: Lucide icon utilities ───────────────────────────── -->
+  <div class="card">
+    <h2>7. Lucide Icon Utilities <span class="tag">components/lucide.css</span></h2>
+    <p>Add <code style="font-family:var(--font-mono)">&lt;script src="https://unpkg.com/lucide@latest/…/lucide.min.js"&gt;&lt;/script&gt;</code> and call <code style="font-family:var(--font-mono)">lucide.createIcons()</code>.</p>
+
+    <p style="margin-top:10px;font-size:12px;color:var(--muted)"><strong style="color:var(--fg-2)">Inline icons (14 px) — <code style="font-family:var(--font-mono)">svg.icon</code></strong></p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:8px 0">
+      <span style="font-size:13px;color:var(--fg-1)"><i data-lucide="layout-dashboard" class="icon"></i> dashboard</span>
+      <span style="font-size:13px;color:var(--fg-1)"><i data-lucide="scan-search" class="icon"></i> inspector</span>
+      <span style="font-size:13px;color:var(--fg-1)"><i data-lucide="clipboard-list" class="icon"></i> plans</span>
+      <span style="font-size:13px;color:var(--fg-1)"><i data-lucide="film" class="icon"></i> replays</span>
+      <span style="font-size:13px;color:var(--fg-1)"><i data-lucide="bar-chart-2" class="icon"></i> perf</span>
+      <span style="font-size:13px;color:var(--fg-1)"><i data-lucide="file-text" class="icon"></i> docs</span>
+    </div>
+
+    <p style="margin-top:12px;font-size:12px;color:var(--muted)"><strong style="color:var(--fg-2)">Empty-state placeholder — <code style="font-family:var(--font-mono)">svg.ph-icon</code></strong></p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin:8px 0">
+      <div class="display-placeholder" style="border:1px dashed var(--line);border-radius:6px;min-width:200px;pointer-events:auto">
+        <i data-lucide="monitor" class="ph-icon"></i>
+        <p class="ph-title">No window selected</p>
+        <p class="ph-hint">Pick a window from the list to begin.</p>
+      </div>
+      <div class="display-placeholder" style="border:1px dashed var(--line);border-radius:6px;min-width:200px;pointer-events:auto">
+        <i data-lucide="film" class="ph-icon"></i>
+        <p class="ph-title">No replays yet</p>
+        <p class="ph-hint">Run a test plan to create a replay bundle.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NEW: IDE Chrome ───────────────────────────────────────── -->
+  <div class="card">
+    <h2>8. IDE Chrome <span class="tag">components/ide-chrome.css</span></h2>
+    <p>VS Code-like shell: titlebar · tabbar · editor · statusbar. Use <code style="font-family:var(--font-mono)">body.ide-shell</code> for full-viewport layout, or embed the sub-components inline.</p>
+
+    <!-- Static preview (not full-viewport — just the chrome parts) -->
+    <div style="margin-top:12px;border:1px solid var(--line);border-radius:6px;overflow:hidden">
+
+      <!-- Titlebar preview -->
+      <div class="ide-titlebar" style="position:relative;">
+        <div class="ide-logo">
+          <span class="ide-logo-name">my-app</span>
+          <span class="ide-logo-tag">IDE</span>
+        </div>
+        <div class="ide-titlebar-right">
+          <span class="ide-theme-label">Theme</span>
+          <button class="ide-theme-btn active" onclick="ThemeSwitcher.apply('genesis-gold');this.closest('.card').querySelectorAll('.ide-theme-btn').forEach(b=>b.classList.toggle('active',b===this))">✦</button>
+          <button class="ide-theme-btn"        onclick="ThemeSwitcher.apply('vscode-dark');this.closest('.card').querySelectorAll('.ide-theme-btn').forEach(b=>b.classList.toggle('active',b===this))">◈</button>
+          <button class="ide-theme-btn"        onclick="ThemeSwitcher.apply('gs-portal');this.closest('.card').querySelectorAll('.ide-theme-btn').forEach(b=>b.classList.toggle('active',b===this))">⬡</button>
+        </div>
+      </div>
+
+      <!-- Tabbar preview -->
+      <div class="ide-tabbar">
+        <div class="ide-tab active">
+          <i data-lucide="layout-dashboard" class="ide-tab-icon"></i>
+          <span class="ide-tab-label">dashboard</span>
+        </div>
+        <div class="ide-tab">
+          <i data-lucide="scan-search" class="ide-tab-icon"></i>
+          <span class="ide-tab-label">inspector</span>
+        </div>
+        <div class="ide-tab">
+          <i data-lucide="clipboard-list" class="ide-tab-icon"></i>
+          <span class="ide-tab-label">plans</span>
+        </div>
+        <div class="ide-tab">
+          <i data-lucide="film" class="ide-tab-icon"></i>
+          <span class="ide-tab-label">replays</span>
+        </div>
+        <div class="ide-tab">
+          <i data-lucide="bar-chart-2" class="ide-tab-icon"></i>
+          <span class="ide-tab-label">perf</span>
+        </div>
+      </div>
+
+      <!-- Editor placeholder -->
+      <div class="display-placeholder" style="min-height:80px;border-top:1px solid var(--line)">
+        <p style="font-size:12px;color:var(--muted)">← editor / iframe content area</p>
+      </div>
+
+      <!-- Statusbar preview -->
+      <div class="ide-statusbar">
+        <span class="sb-left">
+          <span class="sb-item">◈ my-app</span>
+        </span>
+        <span class="sb-right">
+          <span class="sb-item">backend: ready</span>
+          <span class="sb-sep">|</span>
+          <span class="sb-item">dashboard</span>
+        </span>
+      </div>
+    </div>
+
+    <pre class="code" style="margin-top:14px">&lt;body class="ide-shell"&gt;
+  &lt;div class="ide-titlebar"&gt;…&lt;/div&gt;
+  &lt;div class="ide-tabbar"&gt;
+    &lt;div class="ide-tab active"&gt;
+      &lt;i data-lucide="layout-dashboard" class="ide-tab-icon"&gt;&lt;/i&gt;
+      &lt;span class="ide-tab-label"&gt;dashboard&lt;/span&gt;
+    &lt;/div&gt;
+    …
+  &lt;/div&gt;
+  &lt;div class="ide-editor"&gt;&lt;iframe src="/app"&gt;&lt;/iframe&gt;&lt;/div&gt;
+  &lt;div class="ide-statusbar"&gt;…&lt;/div&gt;
+&lt;/body&gt;</pre>
+  </div>
+
 </main>
 
 <script>
@@ -176,8 +316,15 @@ accent: var(--accent);</pre>
   }
 
   render();
-  ThemeSwitcher._onChange = function () { setTimeout(render, 50); };
+  ThemeSwitcher._onChange = function () {
+    setTimeout(render, 50);
+    // Re-render Lucide icons after theme switch (colour variable repaints)
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  };
 })();
+
+// Render all Lucide icons after DOM is ready
+if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 {
   "name": "gs-theme-switcher",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Drop-in multi-theme switcher for vanilla HTML — Genesis Gold, VSCode Dark, GS Portal",
   "main": "theme-switcher.js",
   "style": "themes.css",
@@ -10,9 +10,13 @@
   "files": [
     "themes.css",
     "theme-switcher.js",
+    "components/ide-chrome.css",
+    "components/lucide.css",
     "bin/inject.js",
     "dist/themes.min.css",
     "dist/theme-switcher.min.js",
+    "dist/ide-chrome.min.css",
+    "dist/lucide.min.css",
     "README.md"
   ],
   "keywords": ["theme", "dark-mode", "css-variables", "vanilla-js", "multi-theme"],

@@ -50,9 +50,13 @@ function minifyJS(src) {
 
 /* ── process files ──────────────────────────────────────────────── */
 
+const COMPONENTS = path.join(ROOT, 'components');
+
 const files = [
-  { src: 'themes.css',        dst: 'themes.min.css',        fn: minifyCSS },
-  { src: 'theme-switcher.js', dst: 'theme-switcher.min.js', fn: minifyJS  },
+  { src: 'themes.css',                              dst: 'themes.min.css',        fn: minifyCSS },
+  { src: 'theme-switcher.js',                       dst: 'theme-switcher.min.js', fn: minifyJS  },
+  { src: path.join('components', 'ide-chrome.css'), dst: 'ide-chrome.min.css',    fn: minifyCSS },
+  { src: path.join('components', 'lucide.css'),     dst: 'lucide.min.css',        fn: minifyCSS },
 ];
 
 let ok = true;
