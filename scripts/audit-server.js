@@ -66,7 +66,7 @@ function handleScan(res) {
 
   var repos;
   try {
-    repos = listRepos(50);
+    repos = listRepos(100);
   } catch (e) {
     res.write('data: ' + JSON.stringify({ type: 'error', message: 'gh CLI error: ' + e.message }) + '\n\n');
     res.end();

@@ -44,12 +44,52 @@ function decodeBase64Content(b64str) {
   return Buffer.from(b64str.replace(/\s/g, ''), 'base64').toString('utf8');
 }
 
-/* ── repo listing ────────────────────────────────────────────────── */
+/* ── repo listing ─────────────────────────────────────────────────
+ * gh repo list only returns personal repos; org repos need separate
+ * calls per org.  We also fetch gh org list to cover all 27 repos.
+ * ────────────────────────────────────────────────────────────────── */
+
+var REPO_FIELDS = '--json name,nameWithOwner,url,isPrivate,isFork';
+
+function fetchRepoList(owner, limit) {
+  var ownerArg = owner ? ' "' + owner + '"' : '';
+  var out = run('gh repo list' + ownerArg + ' ' + REPO_FIELDS + ' --limit ' + limit);
+  return JSON.parse(out);
+}
+
+function listOrgs() {
+  try {
+    var out = run('gh org list --limit 50');
+    return out.trim().split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
+  } catch (e) {
+    return [];
+  }
+}
 
 function listRepos(limit) {
-  limit = limit || 50;
-  var out = run('gh repo list --json name,nameWithOwner,url,isPrivate,isFork --limit ' + limit);
-  return JSON.parse(out);
+  limit = limit || 100;
+  var all  = [];
+  var seen = {};
+
+  function add(repos) {
+    repos.forEach(function(r) {
+      if (!seen[r.nameWithOwner]) {
+        seen[r.nameWithOwner] = true;
+        all.push(r);
+      }
+    });
+  }
+
+  // Personal repos
+  try { add(fetchRepoList(null, limit)); } catch (e) {}
+
+  // Org repos (user may belong to orgs like gsinvest)
+  var orgs = listOrgs();
+  orgs.forEach(function(org) {
+    try { add(fetchRepoList(org, limit)); } catch (e) {}
+  });
+
+  return all;
 }
 
 /* ── per-repo scan ───────────────────────────────────────────────── */
