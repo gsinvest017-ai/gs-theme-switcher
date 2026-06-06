@@ -155,6 +155,23 @@ function scanRepo(repo) {
   });
 }
 
+/* ── git identity (read from current repo config) ────────────────── */
+
+function getGitIdentity() {
+  var email = '', name = '';
+  try { email = run('git config user.email').trim(); } catch (e) {}
+  try { name  = run('git config user.name').trim();  } catch (e) {}
+  // Fallback: read from gh auth status
+  if (!email) {
+    try {
+      var ghUser = JSON.parse(run('gh api /user'));
+      email = (ghUser.email || (ghUser.login + '@users.noreply.github.com'));
+      name  = name || ghUser.name || ghUser.login;
+    } catch (e) {}
+  }
+  return { email: email || 'bot@gs-theme-switcher', name: name || 'gs-theme-switcher' };
+}
+
 /* ── apply: clone → inject → commit (no push) ───────────────────── */
 
 function applyToRepo(nameWithOwner, htmlPaths) {
@@ -192,9 +209,13 @@ function applyToRepo(nameWithOwner, htmlPaths) {
       };
     }
 
-    // Commit
+    // Commit — pass identity via -c to avoid needing global git config in temp repos
+    var id = getGitIdentity();
     run('git -C "' + tmpDir + '" add -A');
-    run('git -C "' + tmpDir + '" commit -m "feat: apply gs-theme-switcher CSS/JS"');
+    run(
+      'git -c user.email="' + id.email + '" -c user.name="' + id.name + '"' +
+      ' -C "' + tmpDir + '" commit -m "feat: apply gs-theme-switcher CSS/JS"'
+    );
 
     return {
       ok: true,
