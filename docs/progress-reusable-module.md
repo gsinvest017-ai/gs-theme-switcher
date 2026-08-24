@@ -1,3 +1,10 @@
+---
+type: progress
+updated: 2026-06-04
+repos: [gs-theme-switcher]
+owner: kevin (autogo)
+---
+
 # progress — gs-theme-switcher 跨專案複用模組
 
 **目標**：讓其他 repo 只需一兩行就能引入完整的主題切換 UI，無需安裝 build toolchain。

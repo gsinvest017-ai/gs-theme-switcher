@@ -1,3 +1,10 @@
+---
+type: progress
+updated: 2026-06-06
+repos: [gs-theme-switcher]
+owner: kevin (autogo)
+---
+
 # progress — autogo 前端組件移植到 gs-theme-switcher
 
 **目標**：把 autogo 的前端設計系統（VS Code IDE style tab 欄位、Lucide icon 使用模式、utility classes）提取並加入 gs-theme-switcher，讓其他專案可方便套用，無需自行從 autogo 複製。

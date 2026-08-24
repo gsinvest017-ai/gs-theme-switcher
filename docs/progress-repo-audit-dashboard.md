@@ -1,3 +1,10 @@
+---
+type: progress
+updated: 2026-06-06
+repos: [gs-theme-switcher]
+owner: kevin (autogo)
+---
+
 # Repo Theme Adoption Dashboard
 
 ## 目標
